@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom'
 const Navbar = () => {
     const {accessToken, user} = useAuthStore.getState()
   return (
-    <div className='flex justify-between px-5 py-2 items-center'>
+    <div className='flex justify-between px-5 py-2 items-center bg-white'>
         <Link 
             className='text-xl font-semibold'
             to={'/'}
@@ -18,11 +18,11 @@ const Navbar = () => {
             className=""
         />
         {!accessToken ? (
-            <Button
-                className=''
-            >Login</Button>
+            <Link to={'/login'}>
+                <Button className='' >Login</Button>
+            </Link>
         ) : (
-            !   user.role.includes("SELLER") && (
+            !   user?.role.includes("SELLER") && (
                 <Button>Jadi seller</Button>
             )
         )}

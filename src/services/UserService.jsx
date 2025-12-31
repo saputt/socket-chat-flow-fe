@@ -6,3 +6,7 @@ export const getAllUsersAPI = () =>
     })
 
 
+export const getUserAPI = (id) =>
+    FetchClient(`/api/user/${id}`, {
+        method : "GET"
+    })

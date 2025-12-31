@@ -24,17 +24,14 @@ export const initSocket = () => {
         })
     
         socket.on("new_group", (data) => {
-            console.log(data)
             useChatStore.getState().addGroup(data)
         })
     
         socket.on("delete_room", (roomId) => {
-            console.log(roomId)
             useChatStore.getState().deleteGroup(roomId)
         })
     
         socket.on("update_group", (data) => {
-            console.log(data)
             useChatStore.getState().updateGroup(data)
         })
 

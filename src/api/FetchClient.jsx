@@ -38,12 +38,6 @@ const FetchClient = async (endPoint, option) => {
 
                 setAccessToken(result.accessToken)
 
-                const newHeaders = {
-                    ...headers,
-                    "Authorization" : `Bearer ${result.accessToken}`,
-                    credentials : "include"
-                }
-
                 return fetch(`${baseUrl}${endPoint}`, {
                     ...option,
                     headers: {
@@ -53,7 +47,7 @@ const FetchClient = async (endPoint, option) => {
                     credentials : "include"
                 }).then(res => res.json())
             } else {
-                localStorage.clear()
+                // localStorage.clear()
                 console.log("gajee")
                 // window.location.href= "/login"
             }

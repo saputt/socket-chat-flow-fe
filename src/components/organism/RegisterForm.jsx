@@ -17,8 +17,7 @@ const RegisterForm = () => {
         e.preventDefault()
         setLoading(true)
         try {
-            const result = await registerAPI({name, email, password})
-            console.log(result)
+            await registerAPI({name, email, password})
             navigate('/login')
         } catch (error) {
             console.log(error.message || "error")

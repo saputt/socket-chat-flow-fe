@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import Input from '../components/atoms/Input'
 import Button from '../components/atoms/Button'
 import Navbar from '../components/organism/Navbar'
 import { useChatStore } from '../store/useChatStore'
+import useAuthStore from '../store/useAuthStore'
 
 const ChatPage = () => {
   const {id} = useParams()
@@ -11,45 +12,91 @@ const ChatPage = () => {
   const [content, setContent] = useState()
 
   const messages = useChatStore(state => state.currentMessages)
+  const roomDetail = useChatStore(state => state.detailRoom)
+  const user = useAuthStore(state => state.user)
   const {sendMessageGroup, currentRoom, fetchMessageByRoom} = useChatStore.getState()
+
+  const isGroup = useChatStore(state => state.isGroup)
 
   const handleSendMessage = (e) => {
     e.preventDefault()
+    setContent("")
     sendMessageGroup(id, {content})
   }
 
-  console.log(messages)
+  useEffect(() => {
+    fetchMessageByRoom(id)
+  },[])
 
-  console.log(messages)
+  const scrollRef = useRef(null)
+  
+  const scrollToBottom = () => {
+    scrollRef.current?.scrollIntoView({behavior : "smooth"})
+  }
+  
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages])
+
   return (
-    <div className='h-screen flex flex-col'>
-      <Navbar/>
-      <form onSubmit={handleSendMessage}>
-        <div className='m-auto w-200'>
-          {/* detail room */}
-          <div className='flex bg-amber-100'>
-            {/* image room */}
-            <div></div>
-            {/* detail room info */}
-            <div>
-              <p>hai</p>
+    <div className='mt-10'>
+        <div className='m-auto w-200 bg-white rounded-sm shadow-md overflow-hidden'>
+          <form onSubmit={handleSendMessage}>
+            {/* detail room */}
+            <div className='flex bg-gray-200 px-5 py-3 gap-3'>
+              {/* image room */}
+              <div className='w-7 bg-white aspect-square rounded-full'></div>
+              {/* detail room info */}
+              <div>
+                <p>{roomDetail?.name || "test"}</p>
+              </div>
             </div>
-          </div>
 
-          {/* chat area */}
-          <div className='h-150 bg-gray-50 overflow-y-auto'>
+            {/* chat area */}
+            <div className='h-150 bg-gray-50 overflow-y-auto flex flex-col gap-5 py-7'>
+              {messages?.map(message => (
+                message.senderId === user.id ? (
+                  <div className='flex justify-end' key={message.id}>
+                    <div className='px-5 flex flex-col gap-2'>
+                      {isGroup && (
+                        <p className='text-xs text-right'>
+                          Anda
+                        </p>
+                      )}
+                      <p className='bg-white shadow-md py-1 rounded-xl w-fit px-5'>
+                        {message.content}
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className='flex' key={message.id}>
+                    <div className='px-5 flex flex-col gap-2'>
+                      {isGroup && (
+                        <p className='text-xs'>
+                          {message?.sender?.name}
+                        </p>
+                      )}
+                      <p className='bg-white shadow-md py-1 rounded-xl w-fit px-5'>
+                        {message.content}
+                      </p>
+                    </div>
+                  </div>
+                )
+              ))}
+              <div ref={scrollRef}></div>
+            </div>
 
-          </div>
-
-          {/* input area */}
-          <div className='w-full bg-amber-200 flex py-1 px-3 gap-2'>
-            <Input
-              className='flex-1'
-            />
-            <Button>Send</Button>
-          </div>
+            {/* input area */}
+            <div className='w-full bg-gray-200 flex py-1 px-3 gap-2'>
+              <Input
+                className='flex-1'
+                onChange={(e) => setContent(e.target.value)}
+                value={content}
+              />
+              <Button>Send</Button>
+            </div>
+          </form>
         </div>
-      </form>
     </div>
   )
 }

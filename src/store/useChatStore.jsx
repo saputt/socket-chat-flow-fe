@@ -1,12 +1,17 @@
 import { create } from "zustand";
-import { getAllGroupsAPI, getAllMessageByRoomAPI, joinRoomAPI, sendMessageAPI } from "../services/Chatservice";
+import { getAllGroupsAPI, getAllMessageByRoomAPI, getGroupAPI, joinGroupRoomAPI, joinPrivRoomAPI, sendMessageAPI } from "../services/Chatservice";
 import { initSocket, socket } from "../socket/socketManager";
+import { getUserAPI } from "../services/UserService";
+import useAuthStore from "./useAuthStore";
 
 export const useChatStore = create((set, get) => ({
     groups : [],
     loading : false,
     currentRoom : null,
+    detailRoom : null,
     currentMessages : [],
+    notifMessages : [],
+    isGroup : false,
 
     fetchGroups : async () => {
         set({loading : true})
@@ -53,11 +58,15 @@ export const useChatStore = create((set, get) => ({
         }))
     },
 
-    joinRoom : async (roomId, navigate) => {
-        set({loading : true, currentMessages : []})
+    joinGroupRoom : async (roomId, navigate) => {
+        set({loading : true, currentMessages : [], notifMessages : []})
         try {
-            await joinRoomAPI(roomId)
+            await joinGroupRoomAPI(roomId)
+            navigate(`/chat/${roomId}`)
             const results = await getAllMessageByRoomAPI(roomId)
+            const groupDetail = await getGroupAPI(roomId)
+            set({isGroup : true})
+            set({detailRoom : groupDetail?.data})
             set({currentMessages : results?.data?.message})
             const s = socket || initSocket()
 
@@ -68,7 +77,30 @@ export const useChatStore = create((set, get) => ({
             }
 
             set({currentRoom : roomId})
-            navigate(`/chat/${roomId}`)
+        } catch (error) {
+            throw new Error(error.message)
+        } finally {
+            set({loading : false})
+        }
+    },
+
+    joinPrivRoom : async (sendToId, navigate) => {
+        set({loading : true, currentMessages : [], notifMessages : [], isGroup : false})
+        try {
+            const privRoom = await joinPrivRoomAPI(sendToId)
+            const results = await getAllMessageByRoomAPI(privRoom?.data?.roomId)
+            const sendToDetail = await getUserAPI(sendToId)
+            set({detailRoom : sendToDetail?.data})
+            set({currentMessages : results?.data?.message})
+            const s = socket || initSocket()
+            if(s){
+                s.emit("join_room", privRoom?.data?.roomId)
+            }else{
+                console.log("error")
+            }
+
+            set({currentRoom : privRoom?.data?.roomId})
+            navigate(`/chat/${privRoom?.data?.roomId}`)
         } catch (error) {
             throw new Error(error.message)
         } finally {
@@ -80,7 +112,19 @@ export const useChatStore = create((set, get) => ({
         set({loading : true})
         try {
             const results = await getAllMessageByRoomAPI(roomId)
-            console.log("hasil result, ", results)
+            set({currentMessages : results?.data?.message})
+        } catch (error) {
+            throw new Error(error.message)
+        } finally {
+            set({loading : false})
+        }
+    },
+
+    fetchPrivMessageByRoom : async (sendToId) => {
+        set({loading : true})
+        try {
+            const privRoom = await joinPrivRoomAPI(sendToId)
+            const results = await getAllMessageByRoomAPI(privRoom?.data?.roomId)
             set({currentMessages : results?.data?.message})
         } catch (error) {
             throw new Error(error.message)
@@ -102,11 +146,29 @@ export const useChatStore = create((set, get) => ({
 
     addMessage : (data) => {
         set(state => {
+            console.log(data)
+            let isFromMe = null;
             const messageExist = state.currentMessages.some(m => m.id === data.id)
+            if(data.senderId === useAuthStore.getState().user?.id) {
+                isFromMe = true
+            }
             if(!messageExist){
-                return {currentMessages : [...state.currentMessages, data]}
+                return {
+                    currentMessages : [...state.currentMessages, data],
+                    notifMessages : [!isFromMe && data]
+                }
             }
             return state
         })
+    },
+
+    resetNotifMessages : () => {
+        set({notifMessages : []})
+    },
+    
+    removeOneNotif : () => {
+        set(state => ({
+            notifMessages : state.notifMessages.slice(1)
+        }))
     }
 }))
