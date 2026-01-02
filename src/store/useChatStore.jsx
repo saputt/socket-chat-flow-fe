@@ -146,7 +146,6 @@ export const useChatStore = create((set, get) => ({
 
     addMessage : (data) => {
         set(state => {
-            console.log(data)
             let isFromMe = null;
             const messageExist = state.currentMessages.some(m => m.id === data.id)
             if(data.senderId === useAuthStore.getState().user?.id) {

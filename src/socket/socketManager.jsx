@@ -36,7 +36,6 @@ export const initSocket = () => {
         })
 
         socket.on("send_message", (data) => {
-            console.log(data)
             useChatStore.getState().addMessage(data)
         })
     }

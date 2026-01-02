@@ -57,7 +57,6 @@ const LandingPage = () => {
       joinPrivRoom(sendToId, navigate)
     }
 
-    console.log(notifMessages)
   return (
     <div className='flex lg:px-30 md:px-20 px-15 py-5'>
       <div className='flex-1 flex flex-col gap-5'>

@@ -12,6 +12,12 @@ export const registerAPI = (userData) =>
         body : JSON.stringify(userData)
     })
 
+export const refreshAPI = () => 
+    FetchClient("/api/refresh", {
+        method : "POST"
+    })
+
 export const getProfileAPI = () => FetchClient("/api/me", {method : "GET"})
 
 export const logoutAPI = () => FetchClient("/api/logout", {method : "GET"})
+

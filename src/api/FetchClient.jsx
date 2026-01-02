@@ -1,5 +1,6 @@
 import React from 'react'
 import useAuthStore from '../store/useAuthStore'
+import { refreshAPI } from '../services/AuthService'
 
 const FetchClient = async (endPoint, option) => {
     const baseUrl = "http://localhost:5000"
@@ -19,47 +20,35 @@ const FetchClient = async (endPoint, option) => {
         credentials : "include"
     })
 
+
     if(response.status === 401){
         try {
-            const refreshRes = await fetch(`${baseUrl}/api/refresh`, {
-                method : "POST",
-                headers : {
-                    "Content-Type" : "application/json",
-                },
-                credentials : "include"
-            })
+            const refreshRes = await refreshAPI()
 
-            console.log(refreshRes)
-
-            if(refreshRes.ok){
-                console.log("berhasil")
-
-                const result = await refreshRes.json()
-
-                setAccessToken(result.accessToken)
+            if(refreshRes.status === "Success"){
+                setAccessToken(refreshRes?.accessToken)
 
                 return fetch(`${baseUrl}${endPoint}`, {
                     ...option,
                     headers: {
                         ...headers,
-                        "Authorization" : `Bearer ${result.accessToken}`,
+                        "Authorization" : `Bearer ${refreshRes.accessToken}`,
                     },
                     credentials : "include"
                 }).then(res => res.json())
             } else {
-                // localStorage.clear()
-                console.log("gajee")
-                // window.location.href= "/login"
+                localStorage.clear()
+                window.location.href= "/login"
             }
         } catch (error) {
-            // localStorage.clear()
-            window.location.href = "/login"
+            console.error(error)
         }
+        
     } else if(response.status === 500) throw new Error("Database issue")
 
     const data = await response.json()
 
-    if(!response.ok) throw new Error(data.message || "Error")
+    if(!response.status === "Error") throw new Error(data.message || "Error")
 
     return data
 }
