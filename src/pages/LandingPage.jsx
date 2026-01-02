@@ -11,7 +11,7 @@ import useAuthStore from '../store/useAuthStore'
 const LandingPage = () => {
     const groups = useChatStore(state => state.groups)
     const fetchGroups = useChatStore(state => state.fetchGroups)
-    const { joinGroupRoom, joinPrivRoom, fetchMessageByRoom, fetchPrivMessageByRoom } = useChatStore.getState()
+    const { joinGroupRoom, joinPrivRoom, fetchGroupMessage, fetchPrivMessage } = useChatStore.getState()
     const [groupName, setGroupName] = useState()
     const removeOneNotif = useChatStore(state => state.removeOneNotif)
 
@@ -24,6 +24,8 @@ const LandingPage = () => {
     const notifMessages = useChatStore(state => state.notifMessages)
 
     const navigate = useNavigate()
+
+    console.log(users)
 
     useEffect(() => {
       fetchGroups()
@@ -41,19 +43,18 @@ const LandingPage = () => {
     },[notifMessages])
 
     const handleJoinGroup = async (roomId) => {
-      fetchMessageByRoom(roomId)
       joinGroupRoom(roomId, navigate)
     }
 
     const handleAddGroup = async (e) => {
       e.preventDefault()
-      await addGroupRoomAPI({
+      const s = await addGroupRoomAPI({
         name : groupName
       })
+      console.log(s)
     }
 
     const handleJoinPriv = async (sendToId) => {
-      fetchPrivMessageByRoom(sendToId)
       joinPrivRoom(sendToId, navigate)
     }
 

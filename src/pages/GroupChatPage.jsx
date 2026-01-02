@@ -6,26 +6,28 @@ import Navbar from '../components/organism/Navbar'
 import { useChatStore } from '../store/useChatStore'
 import useAuthStore from '../store/useAuthStore'
 
-const ChatPage = () => {
+const GroupChatPage = () => {
   const {id} = useParams()
 
   const [content, setContent] = useState()
 
   const messages = useChatStore(state => state.currentMessages)
-  const roomDetail = useChatStore(state => state.detailRoom)
+  const groupDetail = useChatStore(state => state.groupDetail)
   const user = useAuthStore(state => state.user)
-  const {sendMessageGroup, currentRoom, fetchMessageByRoom} = useChatStore.getState()
+  const {sendGroupMessage, fetchGroupMessage} = useChatStore.getState()
+
+  console.log(groupDetail)
 
   const isGroup = useChatStore(state => state.isGroup)
 
   const handleSendMessage = (e) => {
     e.preventDefault()
     setContent("")
-    sendMessageGroup(id, {content})
+    sendGroupMessage(id, {content})
   }
 
   useEffect(() => {
-    fetchMessageByRoom(id)
+    fetchGroupMessage(id)
   },[])
 
   const scrollRef = useRef(null)
@@ -48,7 +50,7 @@ const ChatPage = () => {
               <div className='w-7 bg-white aspect-square rounded-full'></div>
               {/* detail room info */}
               <div>
-                <p>{roomDetail?.name || "test"}</p>
+                <p>{groupDetail?.name || groupDetail?.name}</p>
               </div>
             </div>
 
@@ -58,11 +60,9 @@ const ChatPage = () => {
                 message.senderId === user.id ? (
                   <div className='flex justify-end' key={message.id}>
                     <div className='px-5 flex flex-col gap-2'>
-                      {isGroup && (
-                        <p className='text-xs text-right'>
-                          Anda
-                        </p>
-                      )}
+                      <p className='text-xs text-right'>
+                        Anda
+                      </p>
                       <p className='bg-white shadow-md py-1 rounded-xl w-fit px-5'>
                         {message.content}
                       </p>
@@ -71,11 +71,9 @@ const ChatPage = () => {
                 ) : (
                   <div className='flex' key={message.id}>
                     <div className='px-5 flex flex-col gap-2'>
-                      {isGroup && (
-                        <p className='text-xs'>
-                          {message?.sender?.name}
-                        </p>
-                      )}
+                      <p className='text-xs'>
+                        {message?.sender?.name}
+                      </p>
                       <p className='bg-white shadow-md py-1 rounded-xl w-fit px-5'>
                         {message.content}
                       </p>
@@ -101,4 +99,4 @@ const ChatPage = () => {
   )
 }
 
-export default ChatPage
+export default GroupChatPage

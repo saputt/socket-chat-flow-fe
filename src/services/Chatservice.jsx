@@ -17,14 +17,25 @@ export const joinPrivRoomAPI = (sendToId) =>
     })
 
 
-export const sendMessageAPI = (roomId, data) => 
-    FetchClient(`/api/message/${roomId}`, {
+export const sendPrivMessageAPI = (roomId, data) => 
+    FetchClient(`/api/priv-message/${roomId}`, {
         method : "POST",
         body : JSON.stringify(data)
     })
 
-export const getAllMessageByRoomAPI = (roomId) => 
-    FetchClient(`/api/messages/${roomId}`, {
+export const sendGroupMessageAPI = (roomId, data) => 
+    FetchClient(`/api/group-message/${roomId}`, {
+        method : "POST",
+        body : JSON.stringify(data)
+    })
+
+export const getAllPrivMessageAPI = (roomId) => 
+    FetchClient(`/api/priv-messages/${roomId}`, {
+        method : "GET"
+    })
+
+export const getAllGroupMessageAPI = (roomId) => 
+    FetchClient(`/api/group-messages/${roomId}`, {
         method : "GET"
     })
 
@@ -36,5 +47,10 @@ export const addGroupRoomAPI = (dataGroup) =>
 
 export const getGroupAPI = roomId => 
     FetchClient(`/api/group/${roomId}`, {
+        method : "GET"
+    })
+
+export const getPrivRoomIdAPI = sendToId => 
+    FetchClient(`/api/priv-room-id/${sendToId}`, {
         method : "GET"
     })

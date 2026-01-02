@@ -22,7 +22,7 @@ const LoginForm = () => {
                 "password" : password
             })
 
-            setLogin(result.data.user, result.accessToken)
+            setLogin(result?.data?.user, result.accessToken)
 
             navigate("/")
         } catch (error) {

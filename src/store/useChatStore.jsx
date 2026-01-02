@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { getAllGroupsAPI, getAllMessageByRoomAPI, getGroupAPI, joinGroupRoomAPI, joinPrivRoomAPI, sendMessageAPI } from "../services/Chatservice";
+import { getAllGroupMessageAPI, getAllGroupsAPI, getAllPrivMessageAPI, getGroupAPI, getPrivRoomIdAPI, joinGroupRoomAPI, joinPrivRoomAPI, sendGroupMessageAPI, sendPrivMessageAPI } from "../services/Chatservice";
 import { initSocket, socket } from "../socket/socketManager";
 import { getUserAPI } from "../services/UserService";
 import useAuthStore from "./useAuthStore";
@@ -8,10 +8,10 @@ export const useChatStore = create((set, get) => ({
     groups : [],
     loading : false,
     currentRoom : null,
-    detailRoom : null,
+    groupDetail : null,
+    privDetail : null,
     currentMessages : [],
     notifMessages : [],
-    isGroup : false,
 
     fetchGroups : async () => {
         set({loading : true})
@@ -61,12 +61,14 @@ export const useChatStore = create((set, get) => ({
     joinGroupRoom : async (roomId, navigate) => {
         set({loading : true, currentMessages : [], notifMessages : []})
         try {
-            await joinGroupRoomAPI(roomId)
-            navigate(`/chat/${roomId}`)
-            const results = await getAllMessageByRoomAPI(roomId)
+            const a = await joinGroupRoomAPI(roomId)
+            console.log("masuk")
+            navigate(`/group/${roomId}`)
+            const results = await getAllGroupMessageAPI(roomId)
             const groupDetail = await getGroupAPI(roomId)
+            console.log(groupDetail)
             set({isGroup : true})
-            set({detailRoom : groupDetail?.data})
+            set({groupDetail: groupDetail?.data})
             set({currentMessages : results?.data?.message})
             const s = socket || initSocket()
 
@@ -85,12 +87,15 @@ export const useChatStore = create((set, get) => ({
     },
 
     joinPrivRoom : async (sendToId, navigate) => {
-        set({loading : true, currentMessages : [], notifMessages : [], isGroup : false})
+        set({loading : true, currentMessages : [], notifMessages : []})
         try {
+            console.log("hai")
             const privRoom = await joinPrivRoomAPI(sendToId)
-            const results = await getAllMessageByRoomAPI(privRoom?.data?.roomId)
+            navigate(`/chat/${privRoom?.data?.roomId}`)
+            const results = await getAllPrivMessageAPI(privRoom?.data?.roomId)
             const sendToDetail = await getUserAPI(sendToId)
-            set({detailRoom : sendToDetail?.data})
+            console.log(sendToDetail)
+            set({privDetail: sendToDetail?.data})
             set({currentMessages : results?.data?.message})
             const s = socket || initSocket()
             if(s){
@@ -100,7 +105,6 @@ export const useChatStore = create((set, get) => ({
             }
 
             set({currentRoom : privRoom?.data?.roomId})
-            navigate(`/chat/${privRoom?.data?.roomId}`)
         } catch (error) {
             throw new Error(error.message)
         } finally {
@@ -108,10 +112,24 @@ export const useChatStore = create((set, get) => ({
         }
     },
 
-    fetchMessageByRoom : async (roomId) => {
+    fetchGroupMessage : async (roomId) => {
         set({loading : true})
         try {
-            const results = await getAllMessageByRoomAPI(roomId)
+            const results = await getAllGroupMessageAPI(roomId)
+            console.log(results)
+            set({currentMessages : results?.data?.message})
+            set({groupDetail: results?.data})
+        } catch (error) {
+            throw new Error(error.message)
+        } finally {
+            set({loading : false})
+        }
+    },
+
+    fetchPrivMessage: async (roomId) => {
+        set({loading : true})
+        try {
+            const results = await getAllPrivMessageAPI(roomId)
             set({currentMessages : results?.data?.message})
         } catch (error) {
             throw new Error(error.message)
@@ -120,12 +138,11 @@ export const useChatStore = create((set, get) => ({
         }
     },
 
-    fetchPrivMessageByRoom : async (sendToId) => {
+    sendPrivMessage : async (roomId, data) => {
         set({loading : true})
         try {
-            const privRoom = await joinPrivRoomAPI(sendToId)
-            const results = await getAllMessageByRoomAPI(privRoom?.data?.roomId)
-            set({currentMessages : results?.data?.message})
+            const o = await sendPrivMessageAPI(roomId, data)
+            console.log(o)
         } catch (error) {
             throw new Error(error.message)
         } finally {
@@ -133,10 +150,10 @@ export const useChatStore = create((set, get) => ({
         }
     },
 
-    sendMessageGroup : async (roomId, data) => {
+    sendGroupMessage : async (roomId, data) => {
         set({loading : true})
         try {
-            await sendMessageAPI(roomId, data)
+            await sendGroupMessageAPI(roomId, data)
         } catch (error) {
             throw new Error(error.message)
         } finally {
