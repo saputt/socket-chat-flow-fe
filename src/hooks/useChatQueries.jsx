@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { addGroupRoomAPI, getAllGroupMessageAPI, getAllPrivMessageAPI, getGroupsAPI, joinGroupRoomAPI, sendGroupMessageAPI, sendPrivMessageAPI } from "../services/Chatservice";
+import { addGroupRoomAPI, getAllGroupMessageAPI, getAllPrivMessageAPI, getGroupsAPI, joinGroupRoomAPI, joinPrivRoomAPI, sendGroupMessageAPI, sendPrivMessageAPI } from "../services/Chatservice";
 import { getAllUsersAPI } from "../services/UserService";
+import { socket } from "../socket/socketManager";
 
 // QUERY
 export const useGetGroups = () => useQuery({
@@ -45,7 +46,13 @@ export const useSendGroupMessage = () => {
     const queryClient = useQueryClient()
     return useMutation({
         mutationFn : ({roomId, content}) => sendGroupMessageAPI({roomId, content}),
-        onSuccess : (data, variables) => queryClient.invalidateQueries({ queryKey : ["group-messages", variables.roomId] })
+        onSuccess : (data, variables) => {
+            queryClient.invalidateQueries({ queryKey : ["group-messages", variables.roomId] })
+            
+            if(socket){
+                socket.emit("send_")
+            }
+        }
     })
 }
 
@@ -54,6 +61,14 @@ export const useJoinGroup = () => {
     return useMutation({
         mutationFn : (roomId) => joinGroupRoomAPI(roomId),
         onSuccess : (data, roomId) => queryClient.invalidateQueries({ queryKey : ["join-group", roomId] })
+    })
+}
+
+export const useJoinPriv = () => {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn : (roomId) => joinPrivRoomAPI(roomId),
+        onSuccess : (data, roomId) => queryClient.invalidateQueries({ queryKey : ["join-priv", roomId] })
     })
 }
 
