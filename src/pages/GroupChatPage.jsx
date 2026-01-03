@@ -1,101 +1,18 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React from 'react'
 import { useParams } from 'react-router-dom'
-import Input from '../components/atoms/Input'
-import Button from '../components/atoms/Button'
-import Navbar from '../components/organism/Navbar'
-import { useChatStore } from '../store/useChatStore'
-import useAuthStore from '../store/useAuthStore'
+import GroupChat from '../components/organism/chat/GroupChat'
+import ChatLayout from '../components/templates/ChatLayout'
 
 const GroupChatPage = () => {
   const {id} = useParams()
 
-  const [content, setContent] = useState()
-
-  const messages = useChatStore(state => state.currentMessages)
-  const groupDetail = useChatStore(state => state.groupDetail)
-  const user = useAuthStore(state => state.user)
-  const {sendGroupMessage, fetchGroupMessage} = useChatStore.getState()
-
-  console.log(groupDetail)
-
-  const isGroup = useChatStore(state => state.isGroup)
-
-  const handleSendMessage = (e) => {
-    e.preventDefault()
-    setContent("")
-    sendGroupMessage(id, {content})
-  }
-
-  useEffect(() => {
-    fetchGroupMessage(id)
-  },[])
-
-  const scrollRef = useRef(null)
   
-  const scrollToBottom = () => {
-    scrollRef.current?.scrollIntoView({behavior : "smooth"})
-  }
-  
-  useEffect(() => {
-    scrollToBottom()
-  }, [messages])
-
   return (
-    <div className='mt-10'>
-        <div className='m-auto w-200 bg-white rounded-sm shadow-md overflow-hidden'>
-          <form onSubmit={handleSendMessage}>
-            {/* detail room */}
-            <div className='flex bg-gray-200 px-5 py-3 gap-3'>
-              {/* image room */}
-              <div className='w-7 bg-white aspect-square rounded-full'></div>
-              {/* detail room info */}
-              <div>
-                <p>{groupDetail?.name || groupDetail?.name}</p>
-              </div>
-            </div>
-
-            {/* chat area */}
-            <div className='h-150 bg-gray-50 overflow-y-auto flex flex-col gap-5 py-7'>
-              {messages?.map(message => (
-                message.senderId === user.id ? (
-                  <div className='flex justify-end' key={message.id}>
-                    <div className='px-5 flex flex-col gap-2'>
-                      <p className='text-xs text-right'>
-                        Anda
-                      </p>
-                      <p className='bg-white shadow-md py-1 rounded-xl w-fit px-5'>
-                        {message.content}
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className='flex' key={message.id}>
-                    <div className='px-5 flex flex-col gap-2'>
-                      <p className='text-xs'>
-                        {message?.sender?.name}
-                      </p>
-                      <p className='bg-white shadow-md py-1 rounded-xl w-fit px-5'>
-                        {message.content}
-                      </p>
-                    </div>
-                  </div>
-                )
-              ))}
-              <div ref={scrollRef}></div>
-            </div>
-
-            {/* input area */}
-            <div className='w-full bg-gray-200 flex py-1 px-3 gap-2'>
-              <Input
-                className='flex-1'
-                onChange={(e) => setContent(e.target.value)}
-                value={content}
-              />
-              <Button>Send</Button>
-            </div>
-          </form>
-        </div>
-    </div>
+    <ChatLayout>
+      <GroupChat
+        roomId={id}
+      />
+    </ChatLayout>
   )
 }
 

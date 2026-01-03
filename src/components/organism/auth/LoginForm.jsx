@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
-import FormField from '../molecules/FormField'
-import Button from '../atoms/Button'
+import FormField from '../../molecules/FormField'
+import Button from '../../atoms/Button'
 import { Link, useNavigate } from 'react-router-dom'
-import useAuthStore from '../../store/useAuthStore'
-import { loginAPI } from '../../services/AuthService'
+import useAuthStore from '../../../store/useAuthStore'
+import { loginAPI } from '../../../services/AuthService'
 
 const LoginForm = () => {
     const [email, setEmail] = useState()

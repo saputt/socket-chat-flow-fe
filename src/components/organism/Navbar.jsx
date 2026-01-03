@@ -3,6 +3,7 @@ import SearchBar from '../molecules/SearchBar'
 import Button from '../atoms/Button'
 import useAuthStore from '../../store/useAuthStore'
 import { Link } from 'react-router-dom'
+import Input from '../atoms/Input'
 
 const Navbar = () => {
     const {accessToken, user} = useAuthStore.getState()
@@ -14,8 +15,8 @@ const Navbar = () => {
         >
             Kolaa
         </Link>
-        <SearchBar
-            className=""
+        <Input
+            placeholder='Search contact'
         />
         {!accessToken ? (
             <Link to={'/login'}>

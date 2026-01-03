@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
-import FormField from '../molecules/FormField'
-import Button from '../atoms/Button'
 import { Link, useNavigate } from 'react-router-dom'
-import { registerAPI } from '../../services/AuthService'
+import { registerAPI } from '../../../services/AuthService'
+import FormField from '../../molecules/FormField'
+import Button from '../../atoms/Button'
 
 const RegisterForm = () => {
     const [name, setName] = useState()

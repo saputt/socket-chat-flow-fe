@@ -2,6 +2,7 @@ import { io } from "socket.io-client"
 import useUsersStore from "../store/useUsersStore"
 import { useChatStore } from "../store/useChatStore"
 import useAuthStore from "../store/useAuthStore"
+import { queryClient } from "../main"
 
 export let socket
 
@@ -24,19 +25,26 @@ export const initSocket = () => {
         })
     
         socket.on("new_group", (data) => {
-            useChatStore.getState().addGroup(data)
+            queryClient.invalidateQueries({queryKey : ["groups"]})
         })
     
         socket.on("delete_room", (roomId) => {
-            useChatStore.getState().deleteGroup(roomId)
+            queryClient.invalidateQueries({queryKey : ["groups"]})
         })
     
         socket.on("update_group", (data) => {
-            useChatStore.getState().updateGroup(data)
+            queryClient.invalidateQueries({queryKey : ["groups"]})
         })
 
         socket.on("send_message", (data) => {
-            useChatStore.getState().addMessage(data)
+            queryClient.setQueryData(["group-messages", data?.roomId], (oldData) => {
+                if(!oldData) return oldData
+
+                return {
+                    ...oldData,
+                    message: [...oldData.message, data]
+                }
+            })
         })
     }
 

@@ -1,22 +1,25 @@
-import { useEffect } from 'react'
-import useUsersStore from '../../store/useUsersStore'
-import ContactCard from '../molecules/ContactCard'
+import React from 'react'
+import { useGetContacts } from '../../hooks/useChatQueries'
+import ChatCard from '../molecules/ChatCard'
+import useAuthStore from '../../store/useAuthStore'
 
 const ContactList = () => {
-    const users = useUsersStore(state => state.users)
-    const fetchUsers = useUsersStore(state => state.fetchUsers)
+    const {data:contacts, error, isError} = useGetContacts()
 
-    useEffect(() => {   
-        fetchUsers()
-    }, [fetchUsers])
+    const user = useAuthStore(state => state.user)
 
+    console.log(contacts)
   return (
     <div>
-        {users.map((user) => (                
-            <ContactCard
-                name={user.name}
-            />
-        ))}
+        <div>
+            {contacts?.data?.map(contact => (
+                contact?.id !== user?.id && (
+                    <ChatCard
+                        chatName={contact?.name}
+                    />
+                )
+            ))}
+        </div>
     </div>
   )
 }

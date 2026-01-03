@@ -1,8 +1,11 @@
 import React from 'react'
 
-const Card = ({children, className}) => {
+const Card = ({children, className, onClick}) => {
   return (
-    <div className={className}>
+    <div 
+      className={className}
+      onClick={onClick}
+    >
         {children}
     </div>
   )
